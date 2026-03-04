@@ -1,0 +1,1285 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manideep · Portfolio</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Rajdhani:wght@400;600;700&display=swap');
+
+/* ============================================================
+   THEME VARIABLES
+   ============================================================ */
+[data-theme="dark"] {
+  --bg:       #05050f;
+  --bg2:      #0a0a1a;
+  --surface:  rgba(255,255,255,.025);
+  --border:   rgba(255,255,255,.07);
+  --text:     #dde4f0;
+  --muted:    #4a5070;
+  --c1:       #00ffe1;
+  --c2:       #ff4d6d;
+  --c3:       #ffc857;
+  --c4:       #7b5ea7;
+  --nav-bg:   rgba(5,5,15,.8);
+  --glow1:    rgba(0,255,225,.15);
+  --glow2:    rgba(255,77,109,.12);
+  --cur-col:  #00ffe1;
+  --prog-a:   #00ffe1;
+  --prog-b:   #ff4d6d;
+  --scanline: rgba(0,0,0,.04);
+  --card-hover-border: rgba(0,255,225,.25);
+  --tag-col: #00ffe1;
+}
+
+[data-theme="light"] {
+  --bg:       #f0f2f8;
+  --bg2:      #e4e8f5;
+  --surface:  rgba(255,255,255,.7);
+  --border:   rgba(0,0,0,.08);
+  --text:     #1a1c2e;
+  --muted:    #7080a0;
+  --c1:       #0066cc;
+  --c2:       #cc2244;
+  --c3:       #cc8800;
+  --c4:       #5533aa;
+  --nav-bg:   rgba(240,242,248,.88);
+  --glow1:    rgba(0,102,204,.12);
+  --glow2:    rgba(204,34,68,.1);
+  --cur-col:  #0066cc;
+  --prog-a:   #0066cc;
+  --prog-b:   #cc2244;
+  --scanline: transparent;
+  --card-hover-border: rgba(0,102,204,.3);
+  --tag-col: #0066cc;
+}
+
+[data-theme="electric"] {
+  --bg:       #000008;
+  --bg2:      #00000f;
+  --surface:  rgba(255,220,0,.03);
+  --border:   rgba(255,220,0,.12);
+  --text:     #fff8dc;
+  --muted:    #6a5a20;
+  --c1:       #ffe000;
+  --c2:       #ff8c00;
+  --c3:       #ffffff;
+  --c4:       #88ccff;
+  --nav-bg:   rgba(0,0,8,.85);
+  --glow1:    rgba(255,224,0,.2);
+  --glow2:    rgba(255,140,0,.15);
+  --cur-col:  #ffe000;
+  --prog-a:   #ffe000;
+  --prog-b:   #ff8c00;
+  --scanline: rgba(255,220,0,.02);
+  --card-hover-border: rgba(255,224,0,.4);
+  --tag-col: #ffe000;
+}
+
+/* ============================================================
+   BASE
+   ============================================================ */
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Space Mono',monospace;
+  overflow-x:hidden;
+  cursor:none;
+  transition:background .5s, color .5s;
+}
+
+/* ============================================================
+   CURSOR
+   ============================================================ */
+#cur{
+  width:10px;height:10px;
+  background:var(--cur-col);
+  border-radius:50%;
+  position:fixed;pointer-events:none;z-index:9999;
+  transform:translate(-50%,-50%);
+  box-shadow:0 0 20px var(--cur-col);
+  mix-blend-mode:screen;
+  transition:width .2s,height .2s,background .5s,box-shadow .5s;
+}
+#cur-ring{
+  width:32px;height:32px;
+  border:1px solid var(--cur-col);
+  border-radius:50%;
+  position:fixed;pointer-events:none;z-index:9998;
+  transform:translate(-50%,-50%);
+  opacity:.4;
+  transition:width .15s,height .15s,border-color .5s;
+}
+[data-theme="light"] #cur{mix-blend-mode:multiply;}
+
+/* ============================================================
+   THREE CANVAS
+   ============================================================ */
+#three-canvas{
+  position:fixed;top:0;left:0;
+  width:100%;height:100%;
+  z-index:0;pointer-events:none;
+}
+
+/* ============================================================
+   SCANLINES
+   ============================================================ */
+body::after{
+  content:'';
+  position:fixed;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,var(--scanline) 2px,var(--scanline) 4px);
+  pointer-events:none;z-index:9980;
+}
+
+/* ELECTRIC THEME: lightning flicker overlay */
+#elec-overlay{
+  position:fixed;inset:0;
+  pointer-events:none;z-index:9970;
+  opacity:0;
+  background:rgba(255,240,100,.04);
+  transition:opacity .05s;
+  display:none;
+}
+[data-theme="electric"] #elec-overlay{display:block;}
+
+/* ============================================================
+   SCROLL PROGRESS
+   ============================================================ */
+#prog{
+  position:fixed;top:0;left:0;height:2px;
+  background:linear-gradient(90deg,var(--prog-a),var(--prog-b));
+  z-index:9999;width:0%;transition:width .1s;
+}
+
+/* ============================================================
+   THEME SWITCHER
+   ============================================================ */
+#theme-switcher{
+  position:fixed;right:28px;top:50%;
+  transform:translateY(-50%);
+  z-index:600;
+  display:flex;flex-direction:column;gap:10px;
+  background:var(--nav-bg);
+  backdrop-filter:blur(16px);
+  border:1px solid var(--border);
+  padding:14px 10px;
+  border-radius:40px;
+  transition:background .5s,border-color .5s;
+}
+.theme-btn{
+  width:36px;height:36px;border-radius:50%;
+  border:2px solid transparent;
+  cursor:none;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1rem;
+  transition:all .3s;
+  position:relative;
+  background:transparent;
+  line-height:1;
+}
+.theme-btn:hover{transform:scale(1.15);}
+.theme-btn.active{border-color:var(--c1);box-shadow:0 0 12px var(--c1);}
+.theme-btn[data-t="dark"]{background:#0a0a1a;}
+.theme-btn[data-t="light"]{background:#e8eaf6;}
+.theme-btn[data-t="electric"]{background:#0a0800;}
+
+.theme-label{
+  position:absolute;right:calc(100% + 10px);
+  background:var(--nav-bg);
+  border:1px solid var(--border);
+  padding:4px 10px;
+  font-size:.52rem;letter-spacing:.2em;
+  color:var(--text);white-space:nowrap;
+  opacity:0;pointer-events:none;
+  transform:translateX(6px);
+  transition:all .2s;
+  border-radius:4px;
+}
+.theme-btn:hover .theme-label{opacity:1;transform:translateX(0);}
+
+/* ============================================================
+   NAV
+   ============================================================ */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:500;
+  padding:18px 48px;
+  display:flex;justify-content:space-between;align-items:center;
+  background:var(--nav-bg);
+  backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+  transition:background .5s,border-color .5s;
+}
+.logo{
+  font-family:'Orbitron',monospace;font-size:1rem;font-weight:900;
+  color:var(--c1);letter-spacing:.2em;
+  transition:color .5s;
+  cursor:none;
+}
+.logo em{color:var(--c2);font-style:normal;}
+.nav-links{display:flex;gap:28px;list-style:none;}
+.nav-links a{
+  color:var(--muted);text-decoration:none;
+  font-size:.62rem;letter-spacing:.25em;text-transform:uppercase;
+  transition:color .3s;position:relative;cursor:none;
+}
+.nav-links a::after{
+  content:'';position:absolute;bottom:-4px;left:0;right:0;
+  height:1px;background:var(--c1);
+  transform:scaleX(0);transform-origin:left;transition:transform .3s,background .5s;
+}
+.nav-links a:hover{color:var(--c1);}
+.nav-links a:hover::after{transform:scaleX(1);}
+
+/* ============================================================
+   SECTIONS
+   ============================================================ */
+.section{
+  position:relative;z-index:10;
+  min-height:100vh;
+  display:flex;flex-direction:column;justify-content:center;
+  padding:120px 80px;
+  max-width:1260px;margin:0 auto;
+}
+
+.tag{
+  font-size:.58rem;letter-spacing:.5em;color:var(--tag-col);text-transform:uppercase;
+  display:flex;align-items:center;gap:14px;margin-bottom:18px;
+  transition:color .5s;
+}
+.tag::before{content:'';width:32px;height:1px;background:var(--tag-col);transition:background .5s;}
+
+h2.sec-title{
+  font-family:'Orbitron',monospace;
+  font-size:clamp(2rem,5vw,3.5rem);
+  font-weight:900;color:var(--text);
+  line-height:1.1;margin-bottom:50px;
+  transition:color .5s;
+}
+h2.sec-title .c1{color:var(--c1);transition:color .5s;}
+h2.sec-title .c2{color:var(--c2);transition:color .5s;}
+
+.divider{
+  height:1px;
+  background:linear-gradient(90deg,transparent,var(--border),transparent);
+  margin:0 80px;
+  transition:background .5s;
+}
+
+/* ============================================================
+   HERO
+   ============================================================ */
+.badge{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:8px 16px;
+  border:1px solid var(--border);
+  background:var(--surface);
+  font-size:.58rem;letter-spacing:.2em;color:var(--muted);
+  margin-bottom:60px;width:fit-content;
+  transition:all .5s;
+}
+.badge-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--c1);box-shadow:0 0 8px var(--c1);
+  animation:blink 2s infinite;
+  transition:background .5s,box-shadow .5s;
+}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+h1.hero-name{
+  font-family:'Orbitron',monospace;
+  font-size:clamp(3rem,8vw,7rem);
+  font-weight:900;line-height:1;
+  letter-spacing:-.01em;color:var(--text);
+  transition:color .5s;
+}
+h1.hero-name .accent{color:var(--c1);display:block;transition:color .5s;}
+h1.hero-name .dot{color:var(--c2);transition:color .5s;}
+
+.hero-sub{
+  margin-top:24px;font-size:.82rem;
+  color:var(--muted);letter-spacing:.2em;text-transform:uppercase;
+  max-width:520px;line-height:2;
+  transition:color .5s;
+}
+
+.hero-cta{margin-top:48px;display:flex;gap:20px;flex-wrap:wrap;}
+
+.btn{
+  padding:14px 36px;
+  font-family:'Space Mono',monospace;font-size:.65rem;
+  letter-spacing:.2em;text-transform:uppercase;
+  cursor:none;text-decoration:none;
+  display:inline-flex;align-items:center;gap:10px;
+  transition:all .3s;position:relative;overflow:hidden;
+  clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%);
+}
+.btn-primary{background:var(--c1);color:#000;transition:background .5s;}
+.btn-primary:hover{filter:brightness(1.15);transform:translateY(-2px);box-shadow:0 20px 40px var(--glow1);}
+.btn-ghost{border:1px solid var(--border);color:var(--c1);transition:all .5s;}
+.btn-ghost::before{
+  content:'';position:absolute;inset:0;background:var(--c1);
+  transform:scaleX(0);transform-origin:left;transition:transform .35s;z-index:-1;
+}
+.btn-ghost:hover{color:#000;}
+.btn-ghost:hover::before{transform:scaleX(1);}
+
+/* ============================================================
+   ABOUT
+   ============================================================ */
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;}
+.about-desc{font-size:.82rem;color:var(--muted);line-height:2;margin-bottom:16px;transition:color .5s;}
+.hl{color:var(--c1);transition:color .5s;}
+.about-cards{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:28px;}
+.acard{
+  padding:22px;border:1px solid var(--border);background:var(--surface);
+  transition:all .3s;
+}
+.acard:hover{border-color:var(--card-hover-border);background:var(--glow1);transform:translateY(-4px);}
+.acard-num{font-family:'Orbitron',monospace;font-size:1.8rem;font-weight:900;color:var(--c1);transition:color .5s;}
+.acard-lbl{font-size:.55rem;color:var(--muted);letter-spacing:.2em;text-transform:uppercase;margin-top:4px;}
+
+/* Profile orbit */
+.profile-box{display:flex;align-items:center;justify-content:center;}
+.profile-ring{
+  width:280px;height:280px;border-radius:50%;
+  border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  position:relative;animation:spin-slow 20s linear infinite;
+  transition:border-color .5s;
+}
+@keyframes spin-slow{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.profile-inner{
+  width:200px;height:200px;border-radius:50%;
+  background:var(--surface);
+  border:2px solid var(--c1);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Orbitron',monospace;font-size:3.5rem;font-weight:900;
+  color:var(--c1);text-shadow:0 0 30px var(--c1);
+  animation:spin-slow 20s linear infinite reverse;
+  position:relative;z-index:2;
+  transition:border-color .5s,color .5s,text-shadow .5s;
+}
+.orbit-pill{
+  position:absolute;padding:6px 14px;
+  background:var(--nav-bg);border:1px solid var(--border);
+  font-size:.52rem;color:var(--c1);letter-spacing:.15em;white-space:nowrap;
+  animation:spin-slow 20s linear infinite reverse;
+  transition:all .5s;
+}
+
+/* ============================================================
+   SKILLS
+   ============================================================ */
+.skill-group{margin-bottom:36px;}
+.skill-group-title{
+  font-size:.58rem;color:var(--c2);letter-spacing:.4em;text-transform:uppercase;
+  margin-bottom:14px;padding-bottom:8px;
+  border-bottom:1px solid var(--border);transition:color .5s,border-color .5s;
+}
+.chips{display:flex;flex-wrap:wrap;gap:10px;}
+.chip{
+  padding:10px 18px;border:1px solid var(--border);
+  font-size:.6rem;letter-spacing:.1em;color:var(--muted);
+  transition:all .3s;cursor:default;position:relative;overflow:hidden;
+}
+.chip::after{content:'';position:absolute;bottom:0;left:0;height:1px;width:0;background:var(--c1);transition:width .4s,background .5s;}
+.chip:hover{color:var(--c1);border-color:var(--card-hover-border);background:var(--glow1);}
+.chip:hover::after{width:100%;}
+
+/* ============================================================
+   PROJECTS
+   ============================================================ */
+.proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px;}
+.pcard{
+  border:1px solid var(--border);background:var(--surface);
+  padding:28px;transition:all .4s cubic-bezier(.16,1,.3,1);
+  position:relative;overflow:hidden;cursor:none;
+}
+.pcard::before{
+  content:'';position:absolute;top:0;left:0;
+  width:48px;height:1px;background:var(--c1);
+  transition:width .5s,background .5s;
+}
+.pcard:hover::before{width:100%;}
+.pcard:hover{transform:translateY(-8px);border-color:var(--card-hover-border);background:var(--glow1);box-shadow:0 30px 60px rgba(0,0,0,.3);}
+.pcard-num{
+  font-family:'Orbitron',monospace;font-size:2.2rem;font-weight:900;
+  color:var(--border);position:absolute;top:14px;right:18px;
+  transition:color .3s;
+}
+.pcard:hover .pcard-num{color:var(--glow1);}
+.pcard-tag{font-size:.52rem;color:var(--c1);letter-spacing:.3em;text-transform:uppercase;margin-bottom:12px;transition:color .5s;}
+.pcard-title{font-family:'Orbitron',monospace;font-size:.88rem;font-weight:700;color:var(--text);margin-bottom:12px;line-height:1.4;transition:color .5s;}
+.pcard-desc{font-size:.7rem;color:var(--muted);line-height:1.8;margin-bottom:20px;}
+.pcard-link{font-size:.6rem;color:var(--c1);text-decoration:none;letter-spacing:.2em;text-transform:uppercase;border-bottom:1px solid var(--border);padding-bottom:2px;transition:all .3s;cursor:none;}
+.pcard-link:hover{border-color:var(--c1);}
+
+/* ============================================================
+   CONTACT
+   ============================================================ */
+.contact-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:48px;}
+.clink{
+  display:flex;align-items:center;gap:10px;
+  padding:14px 24px;border:1px solid var(--border);
+  color:var(--muted);text-decoration:none;
+  font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;
+  transition:all .3s;position:relative;overflow:hidden;cursor:none;
+}
+.clink::before{
+  content:'';position:absolute;inset:0;background:var(--c1);
+  transform:translateY(100%);transition:transform .35s cubic-bezier(.16,1,.3,1);z-index:0;
+}
+.clink span,.clink svg{position:relative;z-index:1;transition:color .1s;}
+.clink:hover{color:#000;border-color:var(--c1);}
+.clink:hover::before{transform:translateY(0);}
+.clink:hover span,.clink:hover svg{color:#000!important;}
+
+/* ============================================================
+   ELECTRIC THEME SPECIALS
+   ============================================================ */
+[data-theme="electric"] .hero-name{
+  text-shadow:0 0 40px rgba(255,224,0,.5),0 0 80px rgba(255,224,0,.2);
+}
+[data-theme="electric"] .logo{
+  text-shadow:0 0 20px rgba(255,224,0,.8);
+  animation:elec-flicker 4s ease-in-out infinite;
+}
+[data-theme="electric"] body::before{
+  content:'';position:fixed;inset:0;
+  background:radial-gradient(ellipse at 50% 0%,rgba(255,200,0,.04) 0%,transparent 60%);
+  pointer-events:none;z-index:1;
+}
+[data-theme="electric"] .pcard:hover{
+  box-shadow:0 0 30px rgba(255,224,0,.2),0 30px 60px rgba(0,0,0,.6);
+}
+[data-theme="electric"] .chip:hover{
+  box-shadow:0 0 15px rgba(255,224,0,.3);
+}
+[data-theme="electric"] .acard:hover{
+  box-shadow:0 0 20px rgba(255,224,0,.2);
+}
+
+@keyframes elec-flicker{
+  0%,95%,100%{opacity:1}
+  96%{opacity:.5}
+  97%{opacity:1}
+  98%{opacity:.3}
+  99%{opacity:1}
+}
+
+/* LIGHT THEME specials */
+[data-theme="light"] h1.hero-name{color:#1a1c2e;}
+[data-theme="light"] h2.sec-title{color:#1a1c2e;}
+[data-theme="light"] .pcard:hover{box-shadow:0 20px 50px rgba(0,102,204,.1);}
+
+/* ============================================================
+   REVEAL
+   ============================================================ */
+.reveal{opacity:0;transform:translateY(32px);transition:opacity .9s ease,transform .9s cubic-bezier(.16,1,.3,1);}
+.reveal.in{opacity:1;transform:none;}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+footer{
+  position:relative;z-index:10;text-align:center;padding:40px;
+  border-top:1px solid var(--border);
+  font-size:.55rem;color:var(--muted);letter-spacing:.3em;
+  transition:border-color .5s,color .5s;
+}
+
+/* ============================================================
+   LIGHTNING BOLT SVG CURSOR (electric theme)
+   ============================================================ */
+#bolt-cursor{
+  position:fixed;pointer-events:none;z-index:10000;
+  transform:translate(-50%,-70%);
+  display:none;
+}
+[data-theme="electric"] #bolt-cursor{display:block;}
+[data-theme="electric"] #cur{display:none;}
+[data-theme="electric"] #cur-ring{display:none;}
+
+/* ELECTRIC warning strip decoration */
+[data-theme="electric"] .section::before{
+  content:'';
+  position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:repeating-linear-gradient(to bottom,#ffe000 0,#ffe000 10px,transparent 10px,transparent 20px);
+  opacity:.3;
+}
+
+@media(max-width:768px){
+  .section{padding:100px 24px;}
+  .about-grid{grid-template-columns:1fr;}
+  .profile-box{display:none;}
+  nav{padding:14px 20px;}
+  .nav-links li:nth-child(n+4){display:none;}
+  #theme-switcher{right:10px;}
+}
+</style>
+</head>
+<body>
+
+<!-- Cursor elements -->
+<div id="cur"></div>
+<div id="cur-ring"></div>
+<!-- Lightning bolt cursor for electric theme -->
+<svg id="bolt-cursor" width="28" height="40" viewBox="0 0 28 40">
+  <filter id="bolt-glow">
+    <feGaussianBlur stdDeviation="2" result="blur"/>
+    <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
+  <polygon points="16,0 6,20 14,20 10,40 24,14 15,14 22,0" fill="#ffe000" filter="url(#bolt-glow)" opacity="0.95"/>
+  <polygon points="16,0 6,20 14,20 10,40 24,14 15,14 22,0" fill="none" stroke="white" stroke-width=".5" opacity="0.4"/>
+</svg>
+
+<!-- Electric flicker overlay -->
+<div id="elec-overlay"></div>
+
+<!-- Scroll progress -->
+<div id="prog"></div>
+
+<!-- THREE.JS canvas -->
+<canvas id="three-canvas"></canvas>
+
+<!-- ============================================================
+     THEME SWITCHER
+     ============================================================ -->
+<div id="theme-switcher">
+  <button class="theme-btn active" data-t="dark" title="Dark">
+    <span class="theme-label">Dark</span>
+    🌑
+  </button>
+  <button class="theme-btn" data-t="light" title="Light">
+    <span class="theme-label">Light</span>
+    ☀️
+  </button>
+  <button class="theme-btn" data-t="electric" title="Electric ⚡">
+    <span class="theme-label">Electric ⚡</span>
+    ⚡
+  </button>
+</div>
+
+<!-- ============================================================
+     NAV
+     ============================================================ -->
+<nav>
+  <div class="logo">MK<em>.</em></div>
+  <ul class="nav-links">
+    <li><a href="#hero">Home</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#projects">Projects</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- ============================================================
+     HERO
+     ============================================================ -->
+<section class="section" id="hero">
+  <div class="badge reveal">
+    <span class="badge-dot"></span>
+    <span>Available for Collaboration</span>
+  </div>
+  <div class="tag reveal">00 — Hello World</div>
+  <h1 class="hero-name reveal">
+    KUNTIMADDI
+    <span class="accent">MANIDEEP<span class="dot">.</span></span>
+  </h1>
+  <p class="hero-sub reveal">
+    Full Stack Developer &amp; AI Enthusiast<br>
+    Building intelligent systems · Bengaluru, India
+  </p>
+  <div class="hero-cta reveal">
+    <a href="#projects" class="btn btn-primary">View Work</a>
+    <a href="#contact" class="btn btn-ghost">Get in Touch</a>
+  </div>
+  <div style="position:absolute;bottom:48px;left:80px;display:flex;flex-direction:column;align-items:center;gap:10px;z-index:10;" class="reveal">
+    <span style="font-size:.52rem;letter-spacing:.4em;color:var(--muted);writing-mode:vertical-rl;transform:rotate(180deg);">SCROLL</span>
+    <div style="width:1px;height:60px;background:linear-gradient(to bottom,var(--c1),transparent);transition:background .5s;"></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ============================================================
+     ABOUT
+     ============================================================ -->
+<section class="section" id="about">
+  <div class="tag reveal">01 — Who I Am</div>
+  <div class="about-grid">
+    <div>
+      <h2 class="sec-title reveal">Full Stack<br>Dev &amp; <span class="c1">AI</span><br>Enthusiast</h2>
+      <p class="about-desc reveal">Hey! I'm <span class="hl">Manideep</span> — a full-stack developer with a deep passion for building intelligent systems. From pixel-perfect UIs to scalable backends, I thrive at every layer of the stack.</p>
+      <p class="about-desc reveal">Based in <span class="hl">Bengaluru, India</span>. I combine engineering with AI to build things that actually matter — React apps, ML pipelines, IoT devices. Always learning, always building.</p>
+      <div class="about-cards reveal">
+        <div class="acard"><div class="acard-num">72+</div><div class="acard-lbl">GitHub Repos</div></div>
+        <div class="acard"><div class="acard-num">5+</div><div class="acard-lbl">Years Coding</div></div>
+        <div class="acard"><div class="acard-num">20+</div><div class="acard-lbl">Technologies</div></div>
+        <div class="acard"><div class="acard-num">∞</div><div class="acard-lbl">Ideas Brewing</div></div>
+      </div>
+    </div>
+    <div class="profile-box reveal">
+      <div class="profile-ring">
+        <div class="profile-inner">MK</div>
+        <div class="orbit-pill" style="top:-14px;left:50%;transform:translateX(-50%);">React · Node.js</div>
+        <div class="orbit-pill" style="bottom:-14px;left:50%;transform:translateX(-50%);">TensorFlow · AWS</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ============================================================
+     SKILLS
+     ============================================================ -->
+<section class="section" id="skills">
+  <div class="tag reveal">02 — Toolkit</div>
+  <h2 class="sec-title reveal">Tech <span class="c2">Stack</span></h2>
+  <div class="skill-group reveal">
+    <div class="skill-group-title">Frontend</div>
+    <div class="chips">
+      <div class="chip">React</div><div class="chip">React Native</div><div class="chip">Next.js</div>
+      <div class="chip">Angular</div><div class="chip">TypeScript</div><div class="chip">Tailwind CSS</div>
+      <div class="chip">Redux</div><div class="chip">Chart.js</div><div class="chip">Webpack</div>
+    </div>
+  </div>
+  <div class="skill-group reveal">
+    <div class="skill-group-title">Backend</div>
+    <div class="chips">
+      <div class="chip">Node.js</div><div class="chip">Express</div><div class="chip">NestJS</div>
+      <div class="chip">Django</div><div class="chip">GraphQL</div><div class="chip">Socket.io</div>
+      <div class="chip">Kafka</div><div class="chip">JWT</div><div class="chip">Apollo</div>
+    </div>
+  </div>
+  <div class="skill-group reveal">
+    <div class="skill-group-title">AI / ML</div>
+    <div class="chips">
+      <div class="chip">TensorFlow</div><div class="chip">Keras</div><div class="chip">scikit-learn</div>
+      <div class="chip">NumPy</div><div class="chip">Pandas</div><div class="chip">Matplotlib</div>
+    </div>
+  </div>
+  <div class="skill-group reveal">
+    <div class="skill-group-title">Cloud &amp; DevOps</div>
+    <div class="chips">
+      <div class="chip">AWS</div><div class="chip">Azure</div><div class="chip">GCP</div>
+      <div class="chip">Docker</div><div class="chip">GitHub Actions</div><div class="chip">Nginx</div>
+      <div class="chip">Vercel</div><div class="chip">PostgreSQL</div><div class="chip">MongoDB</div>
+      <div class="chip">Firebase</div><div class="chip">Prisma</div><div class="chip">Redis</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ============================================================
+     PROJECTS
+     ============================================================ -->
+<section class="section" id="projects">
+  <div class="tag reveal">03 — Selected Work</div>
+  <h2 class="sec-title reveal">Projects<span class="c1">.</span></h2>
+  <div class="proj-grid">
+    <div class="pcard reveal">
+      <div class="pcard-num">01</div>
+      <div class="pcard-tag">IoT · TypeScript</div>
+      <div class="pcard-title">IoT Home Controller</div>
+      <div class="pcard-desc">Smart home automation using local WiFi. Real-time device management and control via an intuitive TypeScript interface.</div>
+      <a class="pcard-link" href="https://github.com/manideepk90/Iot-home" target="_blank">View on GitHub →</a>
+    </div>
+    <div class="pcard reveal" style="transition-delay:.1s">
+      <div class="pcard-num">02</div>
+      <div class="pcard-tag">Web App · JavaScript</div>
+      <div class="pcard-title">Newz Mixer</div>
+      <div class="pcard-desc">News aggregation platform that curates content from multiple sources into a personalized, unified stream.</div>
+      <a class="pcard-link" href="https://github.com/manideepk90/newz-mixer" target="_blank">View on GitHub →</a>
+    </div>
+    <div class="pcard reveal" style="transition-delay:.2s">
+      <div class="pcard-num">03</div>
+      <div class="pcard-tag">Mobile · TypeScript</div>
+      <div class="pcard-title">Scratch Re-Native</div>
+      <div class="pcard-desc">React Native clone of Scratch — bringing visual block-based programming to mobile with a fully native experience.</div>
+      <a class="pcard-link" href="https://github.com/manideepk90/Scratch-Re-Native" target="_blank">View on GitHub →</a>
+    </div>
+    <div class="pcard reveal" style="transition-delay:.3s">
+      <div class="pcard-num">04</div>
+      <div class="pcard-tag">Full Stack · AI · Open Source</div>
+      <div class="pcard-title">72+ More on GitHub</div>
+      <div class="pcard-desc">Spanning React, Python, Angular, AI/ML, IoT and more. Each repo a new challenge solved with care and craft.</div>
+      <a class="pcard-link" href="https://github.com/manideepk90?tab=repositories" target="_blank">Browse All →</a>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ============================================================
+     CONTACT
+     ============================================================ -->
+<section class="section" id="contact">
+  <div style="text-align:center;width:100%;">
+    <div class="tag reveal" style="justify-content:center">04 — Connect</div>
+    <h2 class="sec-title reveal" style="text-align:center">Let's Build<br><span class="c1">Something Cool</span></h2>
+    <p class="reveal" style="font-size:.78rem;color:var(--muted);max-width:440px;margin:0 auto;line-height:2;text-align:center;">
+      Open to collaborations, freelance projects, and interesting conversations. Reach out — I don't bite 🙂
+    </p>
+    <div class="contact-grid reveal">
+      <a class="clink" href="https://linkedin.com/in/k-manideep" target="_blank">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>
+        <span>LinkedIn</span>
+      </a>
+      <a class="clink" href="https://github.com/manideepk90" target="_blank">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+        <span>GitHub</span>
+      </a>
+      <a class="clink" href="https://x.com/manideepk90" target="_blank">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.26 5.632zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        <span>Twitter / X</span>
+      </a>
+      <a class="clink" href="https://stackoverflow.com/users/14191918" target="_blank">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M15 21H5v-2h10v2zm6-11.665l-1.414-1.414-9.65 9.064 1.414 1.414L21 9.335zM15.182 3.78l-1.414 1.414 7.504 7.504 1.414-1.414L15.182 3.78zM5 17h10v-2H5v2zm0-4h10v-2H5v2z"/></svg>
+        <span>Stack Overflow</span>
+      </a>
+      <a class="clink" href="https://instagram.com/manideepk_" target="_blank">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" fill="var(--bg)"/><circle cx="17.5" cy="6.5" r=".5"/></svg>
+        <span>Instagram</span>
+      </a>
+      <a class="clink" href="https://buymeacoffee.com/manideepk90" target="_blank">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+        <span>Buy Me a Coffee</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>© 2025 Kuntimaddi Manideep · Crafted with ❤ in Bengaluru, India</p>
+</footer>
+
+<!-- THREE.JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// ====================================================
+// CURSOR
+// ====================================================
+const cur = document.getElementById('cur');
+const curRing = document.getElementById('cur-ring');
+const boltCur = document.getElementById('bolt-cursor');
+let mx=0,my=0,rx=0,ry=0;
+
+document.addEventListener('mousemove',e=>{
+  mx=e.clientX; my=e.clientY;
+  cur.style.left=mx+'px'; cur.style.top=my+'px';
+  boltCur.style.left=mx+'px'; boltCur.style.top=my+'px';
+});
+(function animRing(){
+  rx+=(mx-rx)*.1; ry+=(my-ry)*.1;
+  curRing.style.left=rx+'px'; curRing.style.top=ry+'px';
+  requestAnimationFrame(animRing);
+})();
+document.querySelectorAll('a,button,.pcard,.chip,.acard,.theme-btn').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{cur.style.width='18px';cur.style.height='18px';curRing.style.width='56px';curRing.style.height='56px';});
+  el.addEventListener('mouseleave',()=>{cur.style.width='10px';cur.style.height='10px';curRing.style.width='32px';curRing.style.height='32px';});
+});
+
+// ====================================================
+// SCROLL PROGRESS
+// ====================================================
+const prog = document.getElementById('prog');
+window.addEventListener('scroll',()=>{
+  const pct=window.scrollY/(document.body.scrollHeight-window.innerHeight)*100;
+  prog.style.width=pct+'%';
+});
+
+// ====================================================
+// SCROLL REVEAL
+// ====================================================
+const revEls=document.querySelectorAll('.reveal');
+new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('in');});},{threshold:.1}).observe;
+const revObs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('in');});},{threshold:.1});
+revEls.forEach(el=>revObs.observe(el));
+
+// ====================================================
+// NAV SMOOTH SCROLL
+// ====================================================
+document.querySelectorAll('a[href^="#"]').forEach(a=>{
+  a.addEventListener('click',e=>{e.preventDefault();document.querySelector(a.getAttribute('href'))?.scrollIntoView({behavior:'smooth'});});
+});
+
+// ====================================================
+// THEME MANAGER
+// ====================================================
+let currentTheme = 'dark';
+const html = document.documentElement;
+const themeBtns = document.querySelectorAll('.theme-btn');
+const elecOverlay = document.getElementById('elec-overlay');
+
+function setTheme(t) {
+  currentTheme = t;
+  html.setAttribute('data-theme', t);
+  themeBtns.forEach(b => b.classList.toggle('active', b.dataset.t === t));
+  updateThreeScene(t);
+  // Electric flicker effect
+  if(t === 'electric') startElectricFlicker();
+  else stopElectricFlicker();
+}
+
+themeBtns.forEach(btn=>{
+  btn.addEventListener('click',()=>setTheme(btn.dataset.t));
+});
+
+// Electric flicker
+let flickerInterval = null;
+function startElectricFlicker(){
+  if(flickerInterval) return;
+  flickerInterval = setInterval(()=>{
+    if(Math.random()>.7){
+      elecOverlay.style.opacity = (Math.random()*.12).toString();
+      setTimeout(()=>{ elecOverlay.style.opacity='0'; },50+Math.random()*100);
+    }
+  }, 400);
+}
+function stopElectricFlicker(){
+  clearInterval(flickerInterval);
+  flickerInterval=null;
+  elecOverlay.style.opacity='0';
+}
+
+// ====================================================
+// THREE.JS SCENE
+// ====================================================
+const canvas3d = document.getElementById('three-canvas');
+const renderer = new THREE.WebGLRenderer({canvas:canvas3d,antialias:true,alpha:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+renderer.setClearColor(0x000000,0);
+renderer.shadowMap.enabled = true;
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(60,window.innerWidth/window.innerHeight,.1,1000);
+camera.position.set(0,0,14);
+
+window.addEventListener('resize',()=>{
+  camera.aspect=window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth,window.innerHeight);
+});
+renderer.setSize(window.innerWidth,window.innerHeight);
+
+// LIGHTS (shared)
+const ambLight = new THREE.AmbientLight(0xffffff,.15);
+scene.add(ambLight);
+const pt1 = new THREE.PointLight(0x00ffe1,2.5,60);
+pt1.position.set(6,6,6); scene.add(pt1);
+const pt2 = new THREE.PointLight(0xff4d6d,2,60);
+pt2.position.set(-6,-5,5); scene.add(pt2);
+const pt3 = new THREE.PointLight(0xffc857,1.5,60);
+pt3.position.set(0,8,-4); scene.add(pt3);
+
+// Theme-specific lights (electric)
+const elecPt1 = new THREE.PointLight(0xffe000,0,80);
+elecPt1.position.set(0,10,4); scene.add(elecPt1);
+const elecPt2 = new THREE.PointLight(0xff8c00,0,80);
+elecPt2.position.set(-8,-6,4); scene.add(elecPt2);
+const elecPt3 = new THREE.PointLight(0xffffff,0,40);
+elecPt3.position.set(8,0,6); scene.add(elecPt3);
+
+// Light theme light
+const lightThemePt = new THREE.PointLight(0x3399ff,0,80);
+lightThemePt.position.set(0,10,8); scene.add(lightThemePt);
+
+// ======= GEOMETRIES =======
+function rr(a,b){return a+(b-a)*Math.random();}
+
+// --- DARK / LIGHT theme objects ---
+const baseGeos = [
+  new THREE.IcosahedronGeometry(1,0),
+  new THREE.OctahedronGeometry(1,0),
+  new THREE.TetrahedronGeometry(1,0),
+  new THREE.BoxGeometry(1.4,1.4,1.4),
+  new THREE.CylinderGeometry(.6,1,1.5,6,1),
+  new THREE.CylinderGeometry(0,1,1.8,4,1),
+  new THREE.TorusGeometry(.8,.22,8,16),
+  new THREE.SphereGeometry(.9,8,8),
+];
+
+// Dark theme materials
+function makeDarkMats(){
+  return [
+    new THREE.MeshPhongMaterial({color:0x00ffe1,emissive:0x003830,transparent:true,opacity:.8,shininess:150}),
+    new THREE.MeshPhongMaterial({color:0xff4d6d,emissive:0x3a0015,transparent:true,opacity:.75,shininess:130}),
+    new THREE.MeshPhongMaterial({color:0xffc857,emissive:0x3a2500,transparent:true,opacity:.75,shininess:140}),
+    new THREE.MeshPhongMaterial({color:0x7b5ea7,emissive:0x1a0a30,transparent:true,opacity:.75,shininess:120}),
+  ];
+}
+// Light theme materials
+function makeLightMats(){
+  return [
+    new THREE.MeshPhongMaterial({color:0x0066cc,emissive:0x001a40,transparent:true,opacity:.7,shininess:200}),
+    new THREE.MeshPhongMaterial({color:0xcc2244,emissive:0x330010,transparent:true,opacity:.65,shininess:180}),
+    new THREE.MeshPhongMaterial({color:0xcc8800,emissive:0x332200,transparent:true,opacity:.65,shininess:190}),
+    new THREE.MeshPhongMaterial({color:0x5533aa,emissive:0x110022,transparent:true,opacity:.65,shininess:170}),
+  ];
+}
+// Wireframe overlays
+const wireMatDark = new THREE.MeshBasicMaterial({color:0x00ffe1,wireframe:true,transparent:true,opacity:.15});
+const wireMatLight= new THREE.MeshBasicMaterial({color:0x0066cc,wireframe:true,transparent:true,opacity:.12});
+const wireMatElec = new THREE.MeshBasicMaterial({color:0xffe000,wireframe:true,transparent:true,opacity:.22});
+
+// ======= ELECTRIC THEME SPECIAL OBJECTS =======
+// Lightning bolt geometry (extruded)
+function makeBoltGeo(){
+  const shape = new THREE.Shape();
+  shape.moveTo(.4,1); shape.lineTo(0,.1); shape.lineTo(.35,.1);
+  shape.lineTo(-.4,-1); shape.lineTo(0,-.05); shape.lineTo(-.3,-.05); shape.lineTo(.4,1);
+  const geo = new THREE.ShapeGeometry(shape);
+  return geo;
+}
+
+// Electrical symbols: coil/inductor, capacitor plates, resistor
+function makeCoilGeo(){
+  const pts=[];
+  for(let i=0;i<200;i++){
+    const t=i/199;
+    const theta=t*Math.PI*8;
+    const r=0.5+t*.3;
+    pts.push(new THREE.Vector3(Math.cos(theta)*r, t*2-1, Math.sin(theta)*r*.5));
+  }
+  return new THREE.BufferGeometry().setFromPoints(pts);
+}
+
+// Create all scene objects grouped by theme
+const themeGroups = { dark: new THREE.Group(), light: new THREE.Group(), electric: new THREE.Group() };
+Object.values(themeGroups).forEach(g=>scene.add(g));
+
+const objectData = [];
+
+// --- DARK objects ---
+const darkMats = makeDarkMats();
+for(let i=0;i<20;i++){
+  const gIdx=Math.floor(Math.random()*baseGeos.length);
+  const mat=darkMats[Math.floor(Math.random()*darkMats.length)].clone();
+  const mesh=new THREE.Mesh(baseGeos[gIdx],mat);
+  const wireMesh=new THREE.Mesh(baseGeos[gIdx],wireMatDark.clone());
+
+  const x=rr(-10,10), y=rr(-80,5), z=rr(-7,1), sc=rr(.3,1.1);
+  mesh.position.set(x,y,z); mesh.scale.setScalar(sc);
+  mesh.rotation.set(Math.random()*Math.PI,Math.random()*Math.PI,Math.random()*Math.PI);
+  wireMesh.position.copy(mesh.position); wireMesh.scale.setScalar(sc*1.03);
+  wireMesh.rotation.copy(mesh.rotation);
+
+  themeGroups.dark.add(mesh); themeGroups.dark.add(wireMesh);
+  objectData.push({mesh,wireMesh,group:'dark',baseY:y,scale:sc,
+    rx:rr(-.008,.008),ry:rr(-.01,.012),rz:rr(-.006,.006),
+    floatSpd:rr(.003,.008),floatAmp:rr(.15,.45),floatOff:Math.random()*Math.PI*2,
+    scrollF:rr(.4,.9)});
+}
+
+// --- LIGHT objects ---
+const lightMats = makeLightMats();
+for(let i=0;i<20;i++){
+  const gIdx=Math.floor(Math.random()*baseGeos.length);
+  const mat=lightMats[Math.floor(Math.random()*lightMats.length)].clone();
+  const mesh=new THREE.Mesh(baseGeos[gIdx],mat);
+  const wireMesh=new THREE.Mesh(baseGeos[gIdx],wireMatLight.clone());
+
+  const x=rr(-10,10), y=rr(-80,5), z=rr(-7,1), sc=rr(.3,1.0);
+  mesh.position.set(x,y,z); mesh.scale.setScalar(sc);
+  mesh.rotation.set(Math.random()*Math.PI,Math.random()*Math.PI,Math.random()*Math.PI);
+  wireMesh.position.copy(mesh.position); wireMesh.scale.setScalar(sc*1.03);
+  wireMesh.rotation.copy(mesh.rotation);
+
+  themeGroups.light.add(mesh); themeGroups.light.add(wireMesh);
+  objectData.push({mesh,wireMesh,group:'light',baseY:y,scale:sc,
+    rx:rr(-.008,.008),ry:rr(-.01,.012),rz:rr(-.006,.006),
+    floatSpd:rr(.003,.008),floatAmp:rr(.15,.45),floatOff:Math.random()*Math.PI*2,
+    scrollF:rr(.4,.9)});
+}
+
+// --- ELECTRIC objects ---
+// Lightning bolts
+const boltMat = new THREE.MeshBasicMaterial({color:0xffe000,transparent:true,opacity:.9});
+const boltGlowMat = new THREE.MeshBasicMaterial({color:0xffa500,transparent:true,opacity:.4});
+const boltGeo = makeBoltGeo();
+
+for(let i=0;i<14;i++){
+  const mesh=new THREE.Mesh(boltGeo,boltMat.clone());
+  const sc=rr(.4,1.4);
+  const x=rr(-10,10), y=rr(-80,5), z=rr(-6,1);
+  mesh.position.set(x,y,z); mesh.scale.setScalar(sc);
+  mesh.rotation.z=rr(-Math.PI*.2,Math.PI*.2);
+  themeGroups.electric.add(mesh);
+  objectData.push({mesh,wireMesh:null,group:'electric',baseY:y,scale:sc,
+    rx:0,ry:rr(-.005,.005),rz:rr(-.003,.003),
+    floatSpd:rr(.005,.012),floatAmp:rr(.2,.6),floatOff:Math.random()*Math.PI*2,
+    scrollF:rr(.4,.9),isBolt:true,blinkTimer:Math.random()*100});
+}
+
+// Electrical hazard symbols (triangles with ⚡ inside — approximated as torus + cone combos)
+const hazardMat = new THREE.MeshPhongMaterial({color:0xffe000,emissive:0x553300,transparent:true,opacity:.85,shininess:200});
+const hazardWire = new THREE.MeshBasicMaterial({color:0xffa500,wireframe:true,transparent:true,opacity:.3});
+
+const hazardGeos = [
+  new THREE.CylinderGeometry(0,1,1.6,3,1),   // triangle/pyramid
+  new THREE.TorusGeometry(.7,.08,6,3),         // triangle torus
+  new THREE.CylinderGeometry(.05,.05,2.5,8),  // wire/rod
+  new THREE.SphereGeometry(.5,6,6),            // sparky sphere
+  new THREE.TorusGeometry(.9,.15,4,12),        // coil ring
+];
+
+for(let i=0;i<18;i++){
+  const gIdx=Math.floor(Math.random()*hazardGeos.length);
+  const mesh=new THREE.Mesh(hazardGeos[gIdx],hazardMat.clone());
+  const wire=new THREE.Mesh(hazardGeos[gIdx],hazardWire.clone());
+  const sc=rr(.3,1.2);
+  const x=rr(-10,10), y=rr(-80,5), z=rr(-7,1);
+  mesh.position.set(x,y,z); mesh.scale.setScalar(sc);
+  mesh.rotation.set(Math.random()*Math.PI,Math.random()*Math.PI,Math.random()*Math.PI);
+  wire.position.copy(mesh.position); wire.scale.setScalar(sc*1.05);
+  wire.rotation.copy(mesh.rotation);
+  themeGroups.electric.add(mesh); themeGroups.electric.add(wire);
+  objectData.push({mesh,wireMesh:wire,group:'electric',baseY:y,scale:sc,
+    rx:rr(-.006,.006),ry:rr(-.01,.01),rz:rr(-.004,.004),
+    floatSpd:rr(.003,.009),floatAmp:rr(.15,.5),floatOff:Math.random()*Math.PI*2,
+    scrollF:rr(.4,.9),isHazard:true});
+}
+
+// Electric arc lines (Line segments that look like lightning arcs)
+const arcGroup = new THREE.Group();
+themeGroups.electric.add(arcGroup);
+const arcObjects = [];
+
+function generateArc(startX,startY,startZ,length,segments){
+  const pts=[new THREE.Vector3(startX,startY,startZ)];
+  for(let i=1;i<segments;i++){
+    const prev=pts[i-1];
+    pts.push(new THREE.Vector3(
+      prev.x+rr(-0.4,0.4),
+      prev.y+(length/segments)*rr(.5,1.5),
+      prev.z+rr(-0.2,0.2)
+    ));
+  }
+  const geo=new THREE.BufferGeometry().setFromPoints(pts);
+  const mat=new THREE.LineBasicMaterial({color:0xffe000,transparent:true,opacity:rr(.5,.9)});
+  const line=new THREE.Line(geo,mat);
+  return {line,mat,timer:Math.random()*200,maxLife:rr(20,80),life:0};
+}
+
+for(let i=0;i<12;i++){
+  const arc=generateArc(rr(-9,9),rr(-70,4),rr(-5,1),rr(1,4),rr(8,16));
+  arcGroup.add(arc.line);
+  arcObjects.push(arc);
+}
+
+// ======= PARTICLES =======
+// Dark particles
+const darkPartGeo=new THREE.BufferGeometry();
+const dpPos=new Float32Array(300*3),dpCol=new Float32Array(300*3);
+const dpCols=[[0,1,.88],[1,.3,.43],[1,.78,.34],[.48,.37,.65]];
+for(let i=0;i<300;i++){
+  dpPos[i*3]=rr(-14,14);dpPos[i*3+1]=rr(-100,10);dpPos[i*3+2]=rr(-8,0);
+  const c=dpCols[Math.floor(Math.random()*dpCols.length)];
+  dpCol[i*3]=c[0];dpCol[i*3+1]=c[1];dpCol[i*3+2]=c[2];
+}
+darkPartGeo.setAttribute('position',new THREE.BufferAttribute(dpPos,3));
+darkPartGeo.setAttribute('color',new THREE.BufferAttribute(dpCol,3));
+const darkParts=new THREE.Points(darkPartGeo,new THREE.PointsMaterial({size:.06,vertexColors:true,transparent:true,opacity:.7}));
+themeGroups.dark.add(darkParts);
+
+// Light particles
+const lightPartGeo=new THREE.BufferGeometry();
+const lpPos=new Float32Array(200*3),lpCol=new Float32Array(200*3);
+for(let i=0;i<200;i++){
+  lpPos[i*3]=rr(-14,14);lpPos[i*3+1]=rr(-100,10);lpPos[i*3+2]=rr(-8,0);
+  const t=Math.random();
+  lpCol[i*3]=t>.5?0:1;lpCol[i*3+1]=t>.5?.4:.2;lpCol[i*3+2]=t>.5?1:.8;
+}
+lightPartGeo.setAttribute('position',new THREE.BufferAttribute(lpPos,3));
+lightPartGeo.setAttribute('color',new THREE.BufferAttribute(lpCol,3));
+const lightParts=new THREE.Points(lightPartGeo,new THREE.PointsMaterial({size:.05,vertexColors:true,transparent:true,opacity:.5}));
+themeGroups.light.add(lightParts);
+
+// Electric spark particles
+const elecPartGeo=new THREE.BufferGeometry();
+const epPos=new Float32Array(400*3),epCol=new Float32Array(400*3);
+const epSpeeds=new Float32Array(400);
+for(let i=0;i<400;i++){
+  epPos[i*3]=rr(-14,14);epPos[i*3+1]=rr(-100,10);epPos[i*3+2]=rr(-8,0);
+  const hot=Math.random()>.3;
+  epCol[i*3]=1;epCol[i*3+1]=hot?.88:.4;epCol[i*3+2]=hot?0:0;
+  epSpeeds[i]=rr(.005,.025);
+}
+elecPartGeo.setAttribute('position',new THREE.BufferAttribute(epPos,3));
+elecPartGeo.setAttribute('color',new THREE.BufferAttribute(epCol,3));
+const elecParts=new THREE.Points(elecPartGeo,new THREE.PointsMaterial({size:.07,vertexColors:true,transparent:true,opacity:.85}));
+themeGroups.electric.add(elecParts);
+
+// ======= GRID (electric theme floor) =======
+const gridHelper=new THREE.GridHelper(40,40,0xffe000,0xffe000);
+gridHelper.material.transparent=true;
+gridHelper.material.opacity=.06;
+gridHelper.position.y=-15;
+themeGroups.electric.add(gridHelper);
+
+// ======= THEME SCENE UPDATES =======
+function updateThreeScene(t){
+  // Show/hide groups
+  themeGroups.dark.visible  = (t==='dark');
+  themeGroups.light.visible = (t==='light');
+  themeGroups.electric.visible=(t==='electric');
+
+  // Adjust lights
+  if(t==='dark'){
+    ambLight.intensity=.15;
+    pt1.color.set(0x00ffe1);pt1.intensity=2.5;
+    pt2.color.set(0xff4d6d);pt2.intensity=2;
+    pt3.color.set(0xffc857);pt3.intensity=1.5;
+    elecPt1.intensity=0;elecPt2.intensity=0;elecPt3.intensity=0;
+    lightThemePt.intensity=0;
+    renderer.setClearColor(0x000000,0);
+  } else if(t==='light'){
+    ambLight.intensity=.6;
+    pt1.color.set(0x3399ff);pt1.intensity=1.5;
+    pt2.color.set(0xff6699);pt2.intensity=1;
+    pt3.color.set(0xffcc44);pt3.intensity=1;
+    elecPt1.intensity=0;elecPt2.intensity=0;elecPt3.intensity=0;
+    lightThemePt.intensity=2;
+    renderer.setClearColor(0xf0f2f8,.0);
+  } else { // electric
+    ambLight.intensity=.05;
+    pt1.intensity=0;pt2.intensity=0;pt3.intensity=0;
+    lightThemePt.intensity=0;
+    elecPt1.intensity=3;elecPt1.color.set(0xffe000);
+    elecPt2.intensity=2;elecPt2.color.set(0xff8c00);
+    elecPt3.intensity=1.5;elecPt3.color.set(0xffffff);
+    renderer.setClearColor(0x000000,0);
+  }
+}
+updateThreeScene('dark');
+
+// ======= MOUSE & SCROLL =======
+let targetCamX=0,targetCamY=0,scrollY=0;
+document.addEventListener('mousemove',e=>{
+  targetCamX=(e.clientX/window.innerWidth-.5)*.8;
+  targetCamY=-(e.clientY/window.innerHeight-.5)*.6;
+});
+window.addEventListener('scroll',()=>{scrollY=window.scrollY;});
+
+// ======= ANIMATE =======
+const clock=new THREE.Clock();
+let frame=0;
+
+function animate(){
+  requestAnimationFrame(animate);
+  frame++;
+  const t=clock.getElapsedTime();
+  const maxScroll=document.body.scrollHeight-window.innerHeight;
+  const scrollPct=maxScroll>0?scrollY/maxScroll:0;
+
+  // Camera
+  camera.position.x+=(targetCamX-camera.position.x)*.04;
+  const baseCamY=targetCamY;
+  camera.position.y+=(baseCamY-camera.position.y)*.04;
+  camera.position.z=14;
+
+  // Lights orbit
+  pt1.position.x=Math.sin(t*.4)*7;
+  pt1.position.y=Math.cos(t*.3)*5;
+  pt2.position.x=Math.cos(t*.35)*6;
+  pt2.position.y=Math.sin(t*.45)*4;
+  elecPt1.position.x=Math.sin(t*.6)*8;
+  elecPt1.position.y=Math.cos(t*.5)*6+4;
+  elecPt2.position.x=Math.cos(t*.4)*7;
+  elecPt2.position.y=Math.sin(t*.55)*4-3;
+
+  // Electric light flicker
+  if(currentTheme==='electric'){
+    const fk=.7+Math.random()*.6;
+    elecPt1.intensity=3*fk;
+    elecPt3.intensity=(Math.random()>.95)?4:1.2;
+  }
+
+  // Animate all objects
+  objectData.forEach(o=>{
+    if(o.group!==currentTheme){return;}
+    const {mesh,wireMesh,baseY,rx,ry,rz,floatSpd,floatAmp,floatOff,scrollF,scale} = o;
+
+    mesh.rotation.x+=rx;
+    mesh.rotation.y+=ry;
+    mesh.rotation.z+=rz;
+    if(wireMesh){wireMesh.rotation.copy(mesh.rotation);}
+
+    const floatY=Math.sin(t*floatSpd*50+floatOff)*floatAmp;
+    const scrollDrift=scrollPct*-55*scrollF;
+    mesh.position.y=baseY+floatY+scrollDrift;
+    if(wireMesh) wireMesh.position.y=mesh.position.y;
+
+    // Electric bolt blink
+    if(o.isBolt){
+      o.blinkTimer=(o.blinkTimer||0)+1;
+      if(o.blinkTimer>rr(30,120)){
+        o.blinkTimer=0;
+        mesh.material.opacity=Math.random()>.3?.9:.1;
+      }
+      // scale pulse
+      const p=1+Math.sin(t*8+floatOff)*.05;
+      mesh.scale.setScalar(scale*p);
+    }
+
+    // Hazard glow pulse
+    if(o.isHazard && mesh.material.emissive){
+      const em=.2+Math.sin(t*3+floatOff)*.18;
+      mesh.material.emissive.setRGB(em*.8,em*.4,0);
+    }
+  });
+
+  // Arc animations
+  if(currentTheme==='electric'){
+    arcObjects.forEach(arc=>{
+      arc.life++;
+      if(arc.life>arc.maxLife){
+        arcGroup.remove(arc.line);
+        arc.line.geometry.dispose();
+        const newArc=generateArc(rr(-9,9),rr(-70+scrollPct*-30,4),rr(-5,1),rr(1,4),rr(8,16));
+        arcGroup.add(newArc.line);
+        Object.assign(arc,newArc);
+      }
+      // fade in/out
+      const progress=arc.life/arc.maxLife;
+      arc.mat.opacity=progress<.2?progress/.2:progress>.8?(1-progress)/.2:.7+Math.random()*.3;
+      // scroll
+      arc.line.position.y=scrollPct*-55*.6;
+    });
+  }
+
+  // Particle drift
+  if(currentTheme==='dark'||currentTheme==='light'){
+    const pPos=(currentTheme==='dark'?darkPartGeo:lightPartGeo).attributes.position.array;
+    const pCount=currentTheme==='dark'?300:200;
+    for(let i=0;i<pCount;i++){
+      pPos[i*3+1]+=.006;
+      if(pPos[i*3+1]>10+scrollPct*-80) pPos[i*3+1]=-100;
+    }
+    (currentTheme==='dark'?darkPartGeo:lightPartGeo).attributes.position.needsUpdate=true;
+  }
+
+  // Electric sparks
+  if(currentTheme==='electric'){
+    const ep=elecPartGeo.attributes.position.array;
+    for(let i=0;i<400;i++){
+      ep[i*3+1]+=epSpeeds[i];
+      ep[i*3]+=Math.sin(t*2+i)*.005; // waver sideways
+      if(ep[i*3+1]>10+scrollPct*-80) ep[i*3+1]=-100;
+    }
+    elecPartGeo.attributes.position.needsUpdate=true;
+    gridHelper.position.y=-15+scrollPct*-40;
+  }
+
+  renderer.render(scene,camera);
+}
+animate();
+</script>
+</body>
+</html>
