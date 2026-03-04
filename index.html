@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="electric">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -548,11 +548,11 @@ footer{
      THEME SWITCHER
      ============================================================ -->
 <div id="theme-switcher">
-  <button class="theme-btn active" data-t="dark" title="Dark">
+  <button class="theme-btn" data-t="dark" title="Dark">
     <span class="theme-label">Dark</span>
     🌑
   </button>
-  <button class="theme-btn" data-t="light" title="Light">
+  <button class="theme-btn active" data-t="light" title="Light">
     <span class="theme-label">Light</span>
     ☀️
   </button>
@@ -812,7 +812,7 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>{
 // ====================================================
 // THEME MANAGER
 // ====================================================
-let currentTheme = 'dark';
+let currentTheme = 'electric';
 const html = document.documentElement;
 const themeBtns = document.querySelectorAll('.theme-btn');
 const elecOverlay = document.getElementById('elec-overlay');
