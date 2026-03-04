@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="electric">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -658,7 +658,7 @@ footer{
      THEME SWITCHER
      ============================================================ -->
 <div id="theme-switcher">
-  <button class="theme-btn active" data-t="dark" title="Dark">
+  <button class="theme-btn" data-t="dark" title="Dark">
     <span class="theme-label">Dark</span>
     🌑
   </button>
@@ -666,7 +666,7 @@ footer{
     <span class="theme-label">Light</span>
     ☀️
   </button>
-  <button class="theme-btn" data-t="electric" title="Electric ⚡">
+  <button class="theme-btn active" data-t="electric" title="Electric ⚡">
     <span class="theme-label">Electric ⚡</span>
     ⚡
   </button>
@@ -876,17 +876,17 @@ footer{
 <!-- ============================================================
      GAME — REPO QUEST
      ============================================================ -->
-<section class="section" id="game" style="min-height:auto;padding-bottom:80px;">
-  <div class="tag reveal">05 — Level Up</div>
-  <h2 class="sec-title reveal">Repo <span class="c1">Quest</span></h2>
+<section class="section" id="game" style="min-height:auto;padding-bottom:80px;align-items:center;">
+  <div class="tag reveal" style="align-self:flex-start;">05 — Level Up</div>
+  <h2 class="sec-title reveal" style="align-self:flex-start;">Repo <span class="c1">Quest</span></h2>
   <p class="about-desc reveal" style="max-width:580px;margin-bottom:32px;">
     Blast the <span class="hl">bugs</span> to defend the codebase — each wave you clear unlocks a real
     <span class="hl">GitHub repo</span>. 5 waves, 5 repos. Good luck, dev.
   </p>
-  <p class="reveal" style="font-size:.62rem;color:var(--muted);letter-spacing:.2em;margin-bottom:20px;">
+  <p class="reveal" style="font-size:.62rem;color:var(--muted);letter-spacing:.2em;margin-bottom:20px;text-align:center;">
     ← → MOVE &nbsp;·&nbsp; SPACE FIRE &nbsp;·&nbsp; MOBILE: use buttons below
   </p>
-  <div class="reveal" style="display:flex;flex-direction:column;align-items:flex-start;gap:14px;">
+  <div class="reveal" style="display:flex;flex-direction:column;align-items:center;gap:14px;">
     <canvas id="game-canvas" style="border:1px solid var(--border);display:block;max-width:100%;cursor:crosshair;"></canvas>
     <div style="display:flex;gap:10px;justify-content:center;width:700px;max-width:100%;">
       <button id="gbtn-left"  class="btn btn-ghost"    style="flex:1;max-width:100px;height:44px;font-size:1.1rem;padding:0;">◀</button>
@@ -897,7 +897,7 @@ footer{
 </section>
 
 <footer>
-  <p>© 2025 Kuntimaddi Manideep · Crafted with ❤ in Bengaluru, India</p>
+  <p>© 2026 Kuntimaddi Manideep · Crafted with ❤ in Bengaluru, India</p>
 </footer>
 
 <!-- THREE.JS -->
@@ -955,7 +955,7 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>{
 // ====================================================
 // THEME MANAGER
 // ====================================================
-let currentTheme = 'dark';
+let currentTheme = 'electric';
 const html = document.documentElement;
 const themeBtns = document.querySelectorAll('.theme-btn');
 const elecOverlay = document.getElementById('elec-overlay');
@@ -1378,7 +1378,8 @@ function updateThreeScene(t){
     renderer.setClearColor(0x000000,0);
   }
 }
-updateThreeScene('dark');
+updateThreeScene('electric');
+startElectricFlicker();
 
 // ======= MOUSE & SCROLL =======
 let targetCamX=0,targetCamY=0,scrollY=0;
@@ -1771,7 +1772,7 @@ document.querySelectorAll('.pcard,.acard').forEach(card=>{
   // ── INIT WAVE ─────────────────────────────────────
   function initWave(){
     enemies=[]; bullets=[]; enemyBullets=[];
-    swarmDir=1; swarmSpd=CONF.baseSwarmSpd+waveIdx*CONF.swarmAccel; swarmDropQueued=false;
+    swarmDir=1; swarmSpd=CONF.baseSwarmSpd+waveIdx*CONF.swarmAccel; swarmDropQueued=false; enemyShootCd=CONF.baseShootCd;
     const grid=WAVES[waveIdx].grid;
     const cols=Math.min(grid.length,8);
     const rows=Math.ceil(grid.length/cols);
@@ -1974,14 +1975,35 @@ document.querySelectorAll('.pcard,.acard').forEach(card=>{
     // Swarm movement
     const alive=enemies.filter(e=>e.alive);
     if(alive.length===0){ cardTimer=CARD_DUR; STATE='WAVE_CLEAR'; return; }
-    let minX=GW,maxX=0;
-    alive.forEach(e=>{ minX=Math.min(minX,e.x); maxX=Math.max(maxX,e.x); });
+
+    // 1. Execute a queued drop first (if any), then snap edge to wall so the
+    //    new direction's first step immediately clears the boundary.
     if(swarmDropQueued){
       enemies.forEach(e=>{ if(e.alive) e.y+=CONF.swarmDrop; });
       swarmDir*=-1; swarmDropQueued=false;
+      const liveNow=enemies.filter(e=>e.alive);
+      if(liveNow.length){
+        const sMax=liveNow.reduce((m,e)=>Math.max(m,e.x),0);
+        const sMin=liveNow.reduce((m,e)=>Math.min(m,e.x),GW);
+        const adj=sMax>GW-28?GW-28-sMax:sMin<28?28-sMin:0;
+        if(adj) liveNow.forEach(e=>e.x+=adj);
+      }
     }
-    if(maxX>GW-28||minX<28) swarmDropQueued=true;
-    enemies.forEach(e=>{ if(e.alive){ e.x+=swarmDir*swarmSpd; if(e.y>CONF.gameOverY) STATE='GAME_OVER'; }});
+
+    // 2. Move all enemies horizontally.
+    enemies.forEach(e=>{ if(e.alive) e.x+=swarmDir*swarmSpd; });
+
+    // 3. Check bounds AFTER movement so stale pre-drop positions
+    //    never re-trigger a drop on the same frame.
+    const livePost=enemies.filter(e=>e.alive);
+    if(livePost.length){
+      const pMax=livePost.reduce((m,e)=>Math.max(m,e.x),0);
+      const pMin=livePost.reduce((m,e)=>Math.min(m,e.x),GW);
+      if(pMax>GW-28||pMin<28) swarmDropQueued=true;
+    }
+
+    // 4. Game-over check: any enemy reached the player zone?
+    livePost.forEach(e=>{ if(e.y>CONF.gameOverY) STATE='GAME_OVER'; });
     // Enemy shooting
     enemyShootCd--;
     if(enemyShootCd<=0){
