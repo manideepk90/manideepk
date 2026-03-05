@@ -662,7 +662,7 @@ footer{
     <span class="theme-label">Dark</span>
     🌑
   </button>
-  <button class="theme-btn" data-t="light" title="Light">
+  <button class="theme-btn active" data-t="light" title="Light">
     <span class="theme-label">Light</span>
     ☀️
   </button>
@@ -1379,7 +1379,9 @@ function updateThreeScene(t){
   }
 }
 updateThreeScene('electric');
+
 startElectricFlicker();
+
 
 // ======= MOUSE & SCROLL =======
 let targetCamX=0,targetCamY=0,scrollY=0;
